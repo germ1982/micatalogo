@@ -169,6 +169,68 @@
               linear-gradient(90deg, rgba(34, 211, 238, .04) 1px, transparent 1px) 0 0 / 26px 26px;
 }
 
+/* Burbujas: infantil, fondo blanco con salpicaduras de pintura, barra rosa con letras violetas */
+[data-tema="burbujas"] {
+    --fondo: #ffffff;
+    --superficie: #ffffff;
+    --superficie-2: #fff3fa;
+    --texto: #3a1d5c;
+    --texto-suave: #7a5c99;
+    --borde: #f6d3ea;
+    --primario: #e6197e;
+    --primario-hover: #6a1fb5;
+    --primario-texto: #ffffff;
+    --acento: #12a4e0;
+    --barra: #f43f8c;
+    --barra-texto: #ffffff;
+    --pie: #6a1fb5;
+    --pie-texto: #f3e8ff;
+    --radio: 20px;
+    --sombra: 0 8px 22px rgba(106, 31, 181, .12);
+    /* Salpicaduras de pintura (web/img/salpicaduras.svg, se repite) */
+    --patron: url("../img/salpicaduras.svg") 0 0 / 760px 760px;
+}
+[data-tema="burbujas"] body { background-attachment: fixed; }
+[data-tema="burbujas"] .barra { box-shadow: 0 4px 0 #6a1fb5; }
+[data-tema="burbujas"] .barra .marca {
+    color: #6a1fb5;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-shadow: 0 2px 0 rgba(255, 255, 255, .45);
+}
+[data-tema="burbujas"] .barra .marca i { color: #ffd400; }
+[data-tema="burbujas"] .barra .nav-link { color: #fff; font-weight: 600; }
+[data-tema="burbujas"] .barra .nav-link.active { box-shadow: inset 0 -3px 0 #ffd400; }
+[data-tema="burbujas"] .barra .btn-panel { background: #6a1fb5; color: #fff !important; }
+[data-tema="burbujas"] h1, [data-tema="burbujas"] h2 { color: #6a1fb5; font-weight: 700; }
+/* Banner sin foto: manchas de pintura en lugar del degradado */
+[data-tema="burbujas"] .banner {
+    background: url("../img/salpicaduras-banner.svg") center / 640px 640px, #ffffff;
+}
+/* La foto se centra un poco a la derecha: el nombre va a la izquierda y en el celular se ve ese lado */
+[data-tema="burbujas"] .banner.con-imagen { background-size: cover; background-position: 92% 30%; }
+[data-tema="burbujas"] .banner h1 {
+    color: #fff;
+    letter-spacing: .06em;
+    text-shadow: 3px 3px 0 #6a1fb5, -1px -1px 0 #6a1fb5, 0 6px 16px rgba(0, 0, 0, .35);
+}
+[data-tema="burbujas"] .banner .lead { font-weight: 600; text-shadow: 2px 2px 0 #e6197e, 0 4px 10px rgba(0, 0, 0, .35); }
+[data-tema="burbujas"] .banner:not(.con-imagen) .lead {
+    color: #6a1fb5;
+    text-shadow: 2px 0 0 #fff, -2px 0 0 #fff, 0 2px 0 #fff, 0 -2px 0 #fff, 0 0 10px #fff;
+}
+/* Cada tarjeta con un color de la paleta en el borde superior */
+[data-tema="burbujas"] .tarjeta { border: 0; border-top: 6px solid var(--color-tarjeta, #e6197e); }
+[data-tema="burbujas"] .col:nth-child(6n+2) .tarjeta { --color-tarjeta: #12a4e0; }
+[data-tema="burbujas"] .col:nth-child(6n+3) .tarjeta { --color-tarjeta: #ffd400; }
+[data-tema="burbujas"] .col:nth-child(6n+4) .tarjeta { --color-tarjeta: #7ac143; }
+[data-tema="burbujas"] .col:nth-child(6n+5) .tarjeta { --color-tarjeta: #ff7a00; }
+[data-tema="burbujas"] .col:nth-child(6n) .tarjeta { --color-tarjeta: #6a1fb5; }
+[data-tema="burbujas"] .tarjeta:hover { transform: translateY(-4px) rotate(-.6deg); }
+[data-tema="burbujas"] .tarjeta-categoria { color: #12a4e0; }
+[data-tema="burbujas"] .btn-primario { border-radius: 999px; }
+[data-tema="burbujas"] .muestra-barra { color: #6a1fb5; }
+
 /* GERM: el estilo de germweb. Fondo casi negro, bordes cian que brillan,
    paneles de vidrio translúcido y títulos en mayúsculas espaciadas */
 [data-tema="germ"] {

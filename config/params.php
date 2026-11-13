@@ -26,6 +26,8 @@ return [
         'textil' => ['nombre' => 'Textil', 'icono' => 'bi-scissors', 'fuente' => 'Playfair Display', 'oscuro' => false],
         'bazar' => ['nombre' => 'Bazar', 'icono' => 'bi-cup-hot', 'fuente' => 'Quicksand', 'oscuro' => false],
         'tecnologico' => ['nombre' => 'Tecnológico', 'icono' => 'bi-cpu', 'fuente' => 'Space Grotesk', 'oscuro' => true],
+        // Infantil: blanco con salpicaduras de pintura de colores
+        'burbujas' => ['nombre' => 'Burbujas', 'icono' => 'bi-balloon-heart', 'fuente' => 'Fredoka', 'oscuro' => false],
         // Como germweb: oscuro, bordes cian con resplandor y paneles de vidrio
         'germ' => ['nombre' => 'GERM', 'icono' => 'bi-lightning-charge', 'fuente' => 'Orbitron', 'oscuro' => true],
     ],
