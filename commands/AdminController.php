@@ -25,15 +25,32 @@ class AdminController extends Controller
 
     public function actionCrear(string $usuario = '', string $nombre = '')
     {
-        $usuario = $usuario ?: Console::prompt('Usuario:', ['required' => true]);
-        $nombre = $nombre ?: Console::prompt('Nombre:', ['required' => true]);
-        $clave = Console::prompt('Contraseña (mínimo 8 caracteres):', ['required' => true]);
-        $repetida = Console::prompt('Repetí la contraseña:', ['required' => true]);
-        if ($clave !== $repetida) {
-            $this->stderr("Las contraseñas no coinciden.\n", Console::FG_RED);
+        // El usuario y el nombre se validan apenas se escriben, antes de pedir la contraseña
+        $valido = function ($atributo) {
+            return function ($valor, &$error) use ($atributo) {
+                $prueba = new Usuario([$atributo => trim($valor)]);
+                if ($prueba->validate([$atributo])) {
+                    return true;
+                }
+                $error = $prueba->getFirstError($atributo);
 
-            return ExitCode::DATAERR;
+                return false;
+            };
+        };
+        if ($usuario === '' || !$valido('usuario')($usuario, $error)) {
+            if ($usuario !== '') {
+                $this->stderr("- $error\n", Console::FG_RED);
+            }
+            $usuario = Console::prompt('Usuario (un nombre corto o tu email):', ['required' => true, 'validator' => $valido('usuario')]);
         }
+        $nombre = $nombre ?: Console::prompt('Nombre (el que se ve en el panel):', ['required' => true, 'validator' => $valido('nombre')]);
+        do {
+            $clave = Console::prompt('Contraseña (mínimo 8 caracteres):', ['required' => true, 'validator' => $valido('clave')]);
+            $repetida = Console::prompt('Repetí la contraseña:', ['required' => true]);
+            if ($clave !== $repetida) {
+                $this->stderr("- Las contraseñas no coinciden, probá de nuevo.\n", Console::FG_RED);
+            }
+        } while ($clave !== $repetida);
 
         $nuevo = new Usuario([
             'usuario' => $usuario,

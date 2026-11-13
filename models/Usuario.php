@@ -42,15 +42,16 @@ class Usuario extends ActiveRecord implements IdentityInterface
         return [
             [['usuario', 'nombre', 'rol'], 'required'],
             [['usuario', 'nombre'], 'trim'],
-            ['usuario', 'match', 'pattern' => '/^[a-z0-9._\-]{3,40}$/i',
-                'message' => 'Usá de 3 a 40 letras, números, punto, guion o guion bajo.'],
+            // Sirve un nombre corto (ana) o un email (ana@gmail.com)
+            ['usuario', 'match', 'pattern' => '/^[a-z0-9._@+\-]{3,40}$/i',
+                'message' => 'Usá de 3 a 40 caracteres sin espacios: letras, números, punto, guion o @ (sirve tu email).'],
             ['usuario', 'unique', 'message' => 'Ese nombre de usuario ya existe.'],
             ['nombre', 'string', 'max' => 80],
             ['rol', 'in', 'range' => array_keys(self::ROLES)],
             ['activo', 'boolean'],
             ['clave', 'required', 'when' => fn() => $this->isNewRecord,
                 'whenClient' => 'function () { return ' . ($this->isNewRecord ? 'true' : 'false') . '; }'],
-            ['clave', 'string', 'min' => 8, 'max' => 72],
+            ['clave', 'string', 'min' => 8, 'max' => 72, 'tooShort' => 'La contraseña tiene que tener al menos 8 caracteres.'],
         ];
     }
 
