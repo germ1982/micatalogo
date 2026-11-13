@@ -72,6 +72,7 @@ $maximo = Yii::$app->params['fotosPorProducto'];
 <?= $form->field($producto, 'fotosNuevas[]')->fileInput([
     'multiple' => true, 'accept' => 'image/jpeg,image/png,image/webp', 'class' => 'form-control', 'data-vista-previa' => '#vista-previa',
 ])->label('Agregar fotos')->hint("JPG, PNG o WEBP, hasta $maximo por publicación. Se achican solas.") ?>
+<?= $this->render('@app/views/layouts/_camara', ['destino' => '#producto-fotosnuevas']) ?>
 <div id="vista-previa" class="fotos-cargadas mb-3"></div>
 
 <div class="d-flex flex-wrap gap-2">

@@ -794,3 +794,9 @@ a:hover { color: var(--primario-hover); }
     font-weight: 600;
     font-size: .88rem;
 }
+
+/* Botón "Sacar foto": solo en pantallas táctiles (celulares y tablets) */
+.btn-camara { display: none; }
+@media (pointer: coarse) {
+    .btn-camara { display: inline-flex; align-items: center; gap: .4rem; }
+}

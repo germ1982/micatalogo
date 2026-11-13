@@ -116,5 +116,20 @@ window.Catalogo = (function () {
         });
     });
 
+    /* ---------- Botón "Sacar foto": suma cada foto de la cámara al campo de fotos ---------- */
+
+    document.addEventListener('change', function (e) {
+        if (!e.target.matches('[data-camara-para]')) { return; }
+        var camara = e.target;
+        var destino = document.querySelector(camara.getAttribute('data-camara-para'));
+        if (!destino || !camara.files.length || !window.DataTransfer) { return; }
+        var juntas = new DataTransfer();
+        Array.prototype.forEach.call(destino.files, function (f) { juntas.items.add(f); });
+        Array.prototype.forEach.call(camara.files, function (f) { juntas.items.add(f); });
+        destino.files = juntas.files;
+        camara.value = '';   // listo para sacar otra
+        destino.dispatchEvent(new Event('change', { bubbles: true }));   // actualiza la vista previa
+    });
+
     return { mensaje: mensaje };
 })();
