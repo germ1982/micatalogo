@@ -95,7 +95,8 @@ $config = [
     'params' => $params,
 ];
 
-if (YII_ENV_DEV) {
+// Barra de depuración de Yii (el logo abajo a la derecha): solo si se pide en .env
+if (YII_ENV_DEV && !empty($env['DEBUG_TOOLBAR'])) {
     $config['bootstrap'][] = 'debug';
     $config['modules']['debug'] = ['class' => 'yii\debug\Module'];
 }

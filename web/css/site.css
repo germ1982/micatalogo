@@ -169,6 +169,97 @@
               linear-gradient(90deg, rgba(34, 211, 238, .04) 1px, transparent 1px) 0 0 / 26px 26px;
 }
 
+/* GERM: el estilo de germweb. Fondo casi negro, bordes cian que brillan,
+   paneles de vidrio translúcido y títulos en mayúsculas espaciadas */
+[data-tema="germ"] {
+    --fondo: #121212;
+    --superficie: rgba(0, 20, 40, .55);
+    --superficie-2: rgba(0, 30, 55, .6);
+    --texto: #e0f0ff;
+    --texto-suave: #a2c8ff;
+    --borde: rgba(0, 191, 255, .55);
+    --primario: #00bfff;
+    --primario-hover: #00ffcc;
+    --primario-texto: #04121c;
+    --acento: #30c5a7;
+    --barra: rgba(0, 20, 40, .7);
+    --barra-texto: #00bfff;
+    --pie: rgba(0, 20, 40, .7);
+    --pie-texto: #a2c8ff;
+    --radio: 10px;
+    --sombra: 0 0 18px rgba(0, 191, 255, .35);
+    --titulos-mayusculas: uppercase;
+    --patron: radial-gradient(ellipse at 20% 10%, rgba(0, 191, 255, .14), transparent 55%),
+              radial-gradient(ellipse at 85% 90%, rgba(0, 255, 204, .10), transparent 50%);
+}
+[data-tema="germ"] body { background-attachment: fixed; }
+[data-tema="germ"] .barra,
+[data-tema="germ"] .pie,
+[data-tema="germ"] .tarjeta,
+[data-tema="germ"] .caja,
+[data-tema="germ"] .barra-filtros,
+[data-tema="germ"] .acerca-parrafo,
+[data-tema="germ"] .menu-panel {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+[data-tema="germ"] .barra { border-bottom: 2px solid #00bfff; box-shadow: 0 4px 20px rgba(0, 191, 255, .4); }
+[data-tema="germ"] .pie { border-top: 1px solid rgba(0, 191, 255, .5); }
+[data-tema="germ"] .barra .nav-link,
+[data-tema="germ"] .muestra-barra { text-transform: uppercase; letter-spacing: 1px; font-size: .85rem; }
+[data-tema="germ"] .barra .nav-link:hover,
+[data-tema="germ"] .barra .nav-link.active { color: #00ffcc; text-shadow: 0 0 8px rgba(0, 255, 204, .6); }
+[data-tema="germ"] h1, [data-tema="germ"] h2, [data-tema="germ"] .marca {
+    letter-spacing: 2px;
+    text-shadow: 0 0 8px rgba(0, 191, 255, .6);
+}
+[data-tema="germ"] .tarjeta:hover,
+[data-tema="germ"] .acerca-parrafo:hover,
+[data-tema="germ"] .muestra-tema:hover {
+    border-color: #00ffcc;
+    box-shadow: 0 0 30px rgba(0, 225, 255, .85);
+}
+[data-tema="germ"] .marca:hover i { animation: electricidad .4s ease-in-out; }
+/* Las listas desplegables las dibuja el navegador: con fondo translúcido Windows las pinta
+   de gris, así que llevan un azul oscuro sólido */
+[data-tema="germ"] .form-select,
+[data-tema="germ"] select option,
+[data-tema="germ"] select optgroup {
+    background-color: #0b1826;
+    color: #e0f0ff;
+}
+[data-tema="germ"] select option:checked { background-color: #00577a; color: #fff; }
+[data-tema="germ"] .form-select { color-scheme: dark; }
+[data-tema="germ"] .banner { border-bottom: 1px solid #00bfff; box-shadow: 0 0 25px rgba(0, 191, 255, .5); }
+/* Texto del banner en celeste neón (no blanco) sobre una franja oscura degradada,
+   para que se lea sin pelearse con el logo de la imagen */
+[data-tema="germ"] .banner.con-imagen::before {
+    background: linear-gradient(to top, rgba(0, 6, 12, .95) 0%, rgba(0, 6, 12, .88) 30%, rgba(0, 6, 12, .35) 52%, transparent 70%);
+}
+[data-tema="germ"] .banner-texto { padding-bottom: 2.6rem; }
+[data-tema="germ"] .banner-texto h1 {
+    font-size: clamp(1.3rem, 3.6vw, 2.3rem);
+    font-weight: 700;
+    letter-spacing: .18em;
+    color: #a2c8ff;
+    text-shadow: 0 0 2px #000, 0 0 10px rgba(0, 191, 255, .9), 0 0 26px rgba(0, 191, 255, .5);
+}
+[data-tema="germ"] .banner-texto .lead {
+    font-size: clamp(.85rem, 1.8vw, 1rem);
+    letter-spacing: .08em;
+    color: #30c5a7;
+    text-shadow: 0 0 2px #000, 0 0 10px rgba(0, 0, 0, .9);
+}
+[data-tema="germ"] .tarjeta-titulo { letter-spacing: .04em; font-size: .9rem; }
+@keyframes electricidad {
+    0% { filter: brightness(1) drop-shadow(0 0 0 #00ffff); }
+    20% { filter: brightness(1.8) drop-shadow(0 0 12px #00ffff) contrast(150%); }
+    40% { filter: brightness(.8) drop-shadow(0 0 4px #2cdd44); }
+    60% { filter: brightness(2) drop-shadow(0 0 15px #00ffff); }
+    80% { filter: brightness(1.2) drop-shadow(0 0 6px #00ffcc); }
+    100% { filter: brightness(1) drop-shadow(0 0 0 #00ffff); }
+}
+
 /* Bootstrap toma los colores del tema */
 [data-tema] {
     --bs-body-bg: var(--superficie);
