@@ -469,6 +469,12 @@ a:hover { color: var(--primario-hover); }
     background-size: cover;
     background-position: center;
 }
+/* Con imagen, el alto sale de la proporción de la imagen (aspect-ratio en el HTML): en la
+   computadora se ve entera. En el celular queda una altura mínima para el título y se recorta
+   de costado. Tope de alto para pantallas enormes. */
+/* width: 100% evita que min-height estire el ancho a través del aspect-ratio */
+.banner.con-imagen { width: 100%; min-height: 220px; max-height: 80vh; }
+@media (max-width: 575.98px) { .banner.con-imagen { min-height: 260px; } }
 .banner.con-imagen::before {
     content: "";
     position: absolute;

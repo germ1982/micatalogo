@@ -27,10 +27,15 @@ if ($logueado && !($ver['si'] && $ver['no'])) {
     $sinFiltros += ['estado' => 1, 'ver' => array_keys(array_filter($ver))];
 }
 $urlCatalogo = Url::home(true);
+// El banner toma la proporción de la imagen subida, así en la computadora se ve entera y no se corta
+$proporcion = '';
+if ($sitio->banner && ($medidas = @getimagesize(Yii::getAlias('@webroot/' . $sitio->banner)))) {
+    $proporcion = "aspect-ratio: {$medidas[0]} / {$medidas[1]};";
+}
 $this->params['og'] = ['url' => $urlCatalogo];
 ?>
 <section class="banner <?= $sitio->banner ? 'con-imagen' : '' ?>"
-    <?php if ($sitio->banner): ?>style="background-image: url('<?= Html::encode(Fotos::url($sitio->banner)) ?>')"<?php endif; ?>>
+    <?php if ($sitio->banner): ?>style="background-image: url('<?= Html::encode(Fotos::url($sitio->banner)) ?>'); <?= $proporcion ?>"<?php endif; ?>>
     <div class="container banner-texto">
         <h1><?= Html::encode($sitio->nombre) ?></h1>
         <?php if ($sitio->eslogan): ?>
