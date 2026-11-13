@@ -5,6 +5,7 @@
  * @var app\models\Producto $producto
  */
 
+use app\components\Dolar;
 use app\components\Fotos;
 use app\models\Emprendimiento;
 use yii\helpers\Html;
@@ -83,6 +84,11 @@ $this->params['og'] = [
                 <?php endif; ?>
                 <h1 class="ficha-titulo"><?= Html::encode($producto->titulo) ?></h1>
                 <div class="ficha-precio"><?= $producto->precioTexto ?></div>
+                <?php if ($producto->usaDolar): ?>
+                    <div class="ficha-precio-usd">
+                        <?= $producto->precioUsdTexto ?> pasados a pesos <?= Html::encode(Dolar::explicacion()) ?>
+                    </div>
+                <?php endif; ?>
 
                 <?php if ($producto->detalles): ?>
                     <dl class="ficha-detalles">

@@ -38,6 +38,24 @@ class PanelController extends Controller
         ];
     }
 
+    /**
+     * Si un envío supera post_max_size, PHP descarta todos los datos (también el token CSRF)
+     * y Yii mostraría "no se pudieron verificar los datos". Se avisa algo entendible.
+     */
+    public function beforeAction($action)
+    {
+        $pedido = Yii::$app->request;
+        if ($pedido->isPost && empty($_POST) && empty($_FILES) && (int)($_SERVER['CONTENT_LENGTH'] ?? 0) > 0) {
+            Yii::$app->session->setFlash('error', 'Las fotos pesan demasiado para subirlas juntas (el servidor acepta hasta '
+                . ini_get('post_max_size') . 'B por vez). Probá con menos fotos por vez.');
+            $this->redirect($pedido->referrer ?: ['/panel/publicacion/index']);
+
+            return false;
+        }
+
+        return parent::beforeAction($action);
+    }
+
     protected function usuario(): Usuario
     {
         return Yii::$app->user->identity;

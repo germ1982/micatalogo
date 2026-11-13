@@ -52,7 +52,10 @@ $this->title = 'Publicaciones';
             ],
             [
                 'attribute' => 'precio',
-                'value' => fn(Producto $p) => $p->precioTexto,
+                'format' => 'raw',
+                'value' => fn(Producto $p) => $p->precioTexto . (!$p->precio_fijo && $p->precio_usd !== null
+                    ? '<br><small class="text-body-secondary" title="Se calcula con el dólar del día"><i class="bi bi-currency-dollar"></i>' . $p->precioUsdTexto . '</small>'
+                    : ''),
                 'contentOptions' => ['class' => 'text-nowrap'],
             ],
             [

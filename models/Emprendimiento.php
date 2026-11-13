@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\components\Dolar;
 use app\components\Fotos;
 use Yii;
 use yii\db\ActiveRecord;
@@ -23,6 +24,10 @@ use yii\web\UploadedFile;
  * @property string|null $instagram
  * @property string|null $facebook
  * @property string $tema
+ * @property string $dolar_tipo   blue, oficial, bolsa o tarjeta
+ * @property string|null $dolar_manual  si está cargada, se usa en lugar de la de la API
+ * @property string|null $dolar_valor   última cotización leída de la API
+ * @property string|null $dolar_actualizado
  */
 class Emprendimiento extends ActiveRecord
 {
@@ -66,6 +71,10 @@ class Emprendimiento extends ActiveRecord
             ['instagram', 'filter', 'filter' => fn($v) => ltrim((string)$v, '@')],
             ['facebook', 'url', 'defaultScheme' => 'https'],
             ['tema', 'in', 'range' => array_keys(Yii::$app->params['temas'])],
+            ['dolar_tipo', 'in', 'range' => array_keys(Dolar::TIPOS)],
+            ['dolar_manual', 'filter', 'filter' => [Producto::class, 'normalizarPrecio']],
+            ['dolar_manual', 'number', 'min' => 0, 'enableClientValidation' => false, 'message' => 'Escribí solo el número, por ejemplo 1565 o 1.565,50.'],
+            ['dolar_manual', 'default', 'value' => null],
             [array_diff($textos, ['nombre']), 'default', 'value' => null],
             ['bannerNuevo', 'image', 'skipOnEmpty' => true, 'extensions' => 'jpg, jpeg, png, webp',
                 'checkExtensionByMimeType' => true, 'maxSize' => Yii::$app->params['fotoMaximoMb'] * 1024 * 1024],
@@ -86,6 +95,8 @@ class Emprendimiento extends ActiveRecord
             'instagram' => 'Instagram (usuario)',
             'facebook' => 'Facebook (link de la página)',
             'tema' => 'Estilo del sitio',
+            'dolar_tipo' => 'Dólar para calcular los precios',
+            'dolar_manual' => 'Cotización manual (opcional)',
             'bannerNuevo' => 'Imagen del banner',
         ];
     }

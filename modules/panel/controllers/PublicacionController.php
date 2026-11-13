@@ -28,7 +28,7 @@ class PublicacionController extends PanelController
 
     public function actionCrear()
     {
-        $producto = new Producto(['disponible' => true]);
+        $producto = new Producto(['disponible' => true, 'precio_fijo' => true]);
 
         return $this->guardar($producto, 'crear');
     }

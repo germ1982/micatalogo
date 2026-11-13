@@ -8,6 +8,7 @@
  * @var app\models\Producto $producto
  */
 
+use app\components\Dolar;
 use app\components\Fotos;
 use app\models\Categoria;
 use yii\bootstrap5\ActiveForm;
@@ -19,11 +20,23 @@ $maximo = Yii::$app->params['fotosPorProducto'];
 <?php $form = ActiveForm::begin(['options' => ['enctype' => 'multipart/form-data', 'class' => 'caja']]); ?>
 <?= Html::hiddenInput('volver', $volver) ?>
 
-<div class="row">
-    <div class="col-md-8"><?= $form->field($producto, 'titulo')->textInput(['maxlength' => 120, 'autofocus' => $producto->isNewRecord]) ?></div>
-    <div class="col-md-4">
-        <?= $form->field($producto, 'precio')->textInput(['inputmode' => 'decimal', 'placeholder' => 'Vacío = "Consultar"'])
-            ->hint('Ej.: 12500 o 12.500,50') ?>
+<?= $form->field($producto, 'titulo')->textInput(['maxlength' => 120, 'autofocus' => $producto->isNewRecord]) ?>
+
+<?php // Precio: fijo en pesos, o de referencia en dólares que se pasa a pesos con la cotización del día ?>
+<div class="bloque-precio" data-precio data-cotizacion="<?= Dolar::cotizacion() ?? '' ?>">
+    <?= $form->field($producto, 'precio_fijo', ['options' => ['class' => 'form-check form-switch mb-2']])
+        ->checkbox(['class' => 'form-check-input', 'role' => 'switch', 'data-precio-fijo' => true], false)
+        ->label('Precio fijo en pesos', ['class' => 'form-check-label']) ?>
+    <div class="row">
+        <div class="col-md-6" data-precio-pesos>
+            <?= $form->field($producto, 'precio')->textInput(['inputmode' => 'decimal', 'placeholder' => 'Vacío = "Consultar"'])
+                ->label('Precio en pesos')->hint('Ej.: 12500 o 12.500,50') ?>
+        </div>
+        <div class="col-md-6" data-precio-dolares>
+            <?= $form->field($producto, 'precio_usd', ['inputTemplate' => '<div class="input-group"><span class="input-group-text">US$</span>{input}</div>'])
+                ->textInput(['inputmode' => 'decimal', 'placeholder' => 'Ej.: 25 o 25,50', 'data-precio-usd' => true]) ?>
+            <div class="form-text" data-precio-calculado></div>
+        </div>
     </div>
 </div>
 <div class="row">
@@ -71,6 +84,7 @@ $maximo = Yii::$app->params['fotosPorProducto'];
 
 <?= $form->field($producto, 'fotosNuevas[]')->fileInput([
     'multiple' => true, 'accept' => 'image/jpeg,image/png,image/webp', 'class' => 'form-control', 'data-vista-previa' => '#vista-previa',
+    'data-comprimir' => Yii::$app->params['fotoLadoMaximo'],
 ])->label('Agregar fotos')->hint("JPG, PNG o WEBP, hasta $maximo por publicación. Se achican solas.") ?>
 <?= $this->render('@app/views/layouts/_camara', ['destino' => '#producto-fotosnuevas']) ?>
 <div id="vista-previa" class="fotos-cargadas mb-3"></div>

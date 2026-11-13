@@ -37,6 +37,7 @@ $this->title = $parrafo->isNewRecord ? 'Nuevo párrafo' : 'Editar párrafo';
 
 <?= $form->field($parrafo, 'fotosNuevas[]')->fileInput([
     'multiple' => true, 'accept' => 'image/jpeg,image/png,image/webp', 'class' => 'form-control', 'data-vista-previa' => '#vista-previa',
+    'data-comprimir' => Yii::$app->params['fotoLadoMaximo'],
 ])->label('Agregar fotos')->hint('Una o varias (hasta 6 por vez). Se ajustan a la altura del texto.') ?>
 <?= $this->render('@app/views/layouts/_camara', ['destino' => '#acercaparrafo-fotosnuevas']) ?>
 <div id="vista-previa" class="fotos-cargadas mb-3"></div>

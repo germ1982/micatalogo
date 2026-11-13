@@ -5,6 +5,7 @@
  * @var app\models\Emprendimiento $datos
  */
 
+use app\components\Dolar;
 use app\components\Fotos;
 use yii\bootstrap5\ActiveForm;
 use yii\helpers\Html;
@@ -25,7 +26,7 @@ $this->title = 'Datos del emprendimiento';
 
 <div class="row align-items-end">
     <div class="col-md-6">
-        <?= $form->field($datos, 'bannerNuevo')->fileInput(['accept' => 'image/jpeg,image/png,image/webp', 'class' => 'form-control'])
+        <?= $form->field($datos, 'bannerNuevo')->fileInput(['accept' => 'image/jpeg,image/png,image/webp', 'class' => 'form-control', 'data-comprimir' => Yii::$app->params['fotoLadoBanner']])
             ->hint('Una foto horizontal de tu emprendimiento. Se achica sola a 1920 px.') ?>
     </div>
     <div class="col-md-6 mb-3">
@@ -52,6 +53,36 @@ $this->title = 'Datos del emprendimiento';
     <div class="col-md-6"><?= $form->field($datos, 'horario')->textInput(['placeholder' => 'Lunes a viernes de 9 a 18']) ?></div>
     <div class="col-md-6"><?= $form->field($datos, 'instagram')->textInput(['placeholder' => 'miemprendimiento']) ?></div>
     <div class="col-md-12"><?= $form->field($datos, 'facebook')->textInput(['placeholder' => 'https://www.facebook.com/miemprendimiento']) ?></div>
+</div>
+
+<h2 class="h6 subtitulo-panel mt-3" id="dolar">Precios en dólares</h2>
+<p class="small text-body-secondary">
+    Las publicaciones sin "precio fijo en pesos" muestran su precio en dólares pasado a pesos con esta cotización.
+    Se consulta sola cada 30 minutos en dolarapi.com.
+</p>
+<div class="row align-items-start">
+    <div class="col-md-5"><?= $form->field($datos, 'dolar_tipo')->dropDownList(Dolar::TIPOS) ?></div>
+    <div class="col-md-4">
+        <?= $form->field($datos, 'dolar_manual')->textInput(['inputmode' => 'decimal', 'placeholder' => 'Vacío = automática'])
+            ->hint('Si la cargás, se usa esta en lugar de la automática.') ?>
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">Cotización en uso</label>
+        <div class="cotizacion-actual">
+            <?php if (Dolar::cotizacion() !== null): ?>
+                <strong>$ <?= number_format(Dolar::cotizacion(), 2, ',', '.') ?></strong>
+                <small class="d-block text-body-secondary">
+                    <?= $datos->dolar_manual !== null ? 'Manual' : Html::encode(Dolar::TIPOS[$datos->dolar_tipo] ?? '')
+                        . ($datos->dolar_actualizado ? ' · ' . Yii::$app->formatter->asDatetime($datos->dolar_actualizado) : '') ?>
+                </small>
+            <?php else: ?>
+                <small class="text-body-secondary">Todavía sin cotización</small>
+            <?php endif; ?>
+            <?= Html::a('<i class="bi bi-arrow-clockwise"></i> Actualizar ahora', ['actualizar-dolar'], [
+                'class' => 'btn btn-sm btn-outline-secondary mt-1', 'data-method' => 'post', 'data-form' => 'form-aparte',
+            ]) ?>
+        </div>
+    </div>
 </div>
 
 <?= Html::submitButton('<i class="bi bi-check-lg"></i> Guardar', ['class' => 'btn btn-primario']) ?>

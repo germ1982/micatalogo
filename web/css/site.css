@@ -800,3 +800,8 @@ a:hover { color: var(--primario-hover); }
 @media (pointer: coarse) {
     .btn-camara { display: inline-flex; align-items: center; gap: .4rem; }
 }
+
+/* Precio atado al dólar */
+.ficha-precio-usd { margin: -.75rem 0 1rem; font-size: .85rem; color: var(--texto-suave); }
+.bloque-precio { background: var(--superficie-2); border: 1px solid var(--borde); border-radius: var(--radio); padding: .9rem 1rem .1rem; margin-bottom: 1rem; }
+.cotizacion-actual strong { font-size: 1.2rem; }

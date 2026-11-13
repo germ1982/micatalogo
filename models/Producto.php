@@ -2,10 +2,12 @@
 
 namespace app\models;
 
+use app\components\Dolar;
 use app\components\Fotos;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\db\ActiveRecord;
+use yii\db\Expression;
 use yii\helpers\Inflector;
 use yii\helpers\StringHelper;
 use yii\helpers\Url;
@@ -19,6 +21,8 @@ use yii\web\UploadedFile;
  * @property string $titulo
  * @property string|null $descripcion
  * @property string|null $precio
+ * @property bool $precio_fijo
+ * @property string|null $precio_usd
  * @property string|null $talle
  * @property string|null $color
  * @property string|null $material
@@ -57,13 +61,16 @@ class Producto extends ActiveRecord
             ['descripcion', 'string', 'max' => 5000],
             [['talle', 'color'], 'string', 'max' => 60],
             ['material', 'string', 'max' => 80],
-            ['precio', 'filter', 'filter' => [self::class, 'normalizarPrecio']],
+            [['precio', 'precio_usd'], 'filter', 'filter' => [self::class, 'normalizarPrecio']],
             // Sin validación en el navegador: "12.500,50" recién se normaliza en el servidor
-            ['precio', 'number', 'min' => 0, 'max' => 9999999999, 'enableClientValidation' => false,
+            [['precio', 'precio_usd'], 'number', 'min' => 0, 'max' => 9999999999, 'enableClientValidation' => false,
                 'message' => 'Escribí solo el número, por ejemplo 12500 o 12.500,50.'],
+            ['precio_fijo', 'boolean'],
+            ['precio_usd', 'required', 'when' => fn() => !$this->precio_fijo, 'enableClientValidation' => false,
+                'message' => 'Si el precio no es fijo, cargá el precio de referencia en dólares.'],
             ['categoria_id', 'exist', 'targetClass' => Categoria::class, 'targetAttribute' => 'id'],
             ['disponible', 'boolean'],
-            [['descripcion', 'talle', 'color', 'material', 'precio', 'categoria_id'], 'default', 'value' => null],
+            [['descripcion', 'talle', 'color', 'material', 'precio', 'precio_usd', 'categoria_id'], 'default', 'value' => null],
             ['fotosNuevas', 'image', 'skipOnEmpty' => true, 'maxFiles' => Yii::$app->params['fotosPorProducto'],
                 'extensions' => 'jpg, jpeg, png, webp', 'checkExtensionByMimeType' => true,
                 'maxSize' => Yii::$app->params['fotoMaximoMb'] * 1024 * 1024],
@@ -77,6 +84,8 @@ class Producto extends ActiveRecord
             'titulo' => 'Título',
             'descripcion' => 'Descripción',
             'precio' => 'Precio',
+            'precio_fijo' => 'Precio fijo en pesos',
+            'precio_usd' => 'Precio de referencia en dólares',
             'talle' => 'Talle',
             'color' => 'Color',
             'material' => 'Material',
@@ -171,14 +180,40 @@ class Producto extends ActiveRecord
         return Url::to(['/site/producto', 'id' => $this->id, 'slug' => $this->getSlug()], $absoluta);
     }
 
+    /** ¿El precio en pesos sale del precio en dólares y la cotización del día? */
+    public function getUsaDolar(): bool
+    {
+        return !$this->precio_fijo && $this->precio_usd !== null && Dolar::cotizacion() !== null;
+    }
+
+    /**
+     * Precio en pesos que ve el público: el fijo, o el de dólares por la cotización
+     * (redondeado a pesos enteros). Si no hay cotización, queda el precio en pesos cargado.
+     */
+    public function getPrecioPesos(): ?float
+    {
+        if ($this->getUsaDolar()) {
+            return round((float)$this->precio_usd * Dolar::cotizacion());
+        }
+
+        return $this->precio === null || $this->precio === '' ? null : (float)$this->precio;
+    }
+
     public function getPrecioTexto(): string
     {
-        if ($this->precio === null || $this->precio === '') {
+        $precio = $this->getPrecioPesos();
+        if ($precio === null) {
             return 'Consultar';
         }
-        $decimales = fmod((float)$this->precio, 1) > 0 ? 2 : 0;
 
-        return '$ ' . number_format((float)$this->precio, $decimales, ',', '.');
+        return '$ ' . number_format($precio, fmod($precio, 1) > 0 ? 2 : 0, ',', '.');
+    }
+
+    public function getPrecioUsdTexto(): string
+    {
+        $usd = (float)$this->precio_usd;
+
+        return 'US$ ' . number_format($usd, fmod($usd, 1) > 0 ? 2 : 0, ',', '.');
     }
 
     /** Talle, color y material, solo los que están cargados */
@@ -216,12 +251,17 @@ class Producto extends ActiveRecord
             ]);
         }
 
-        $sinPrecioAlFinal = new \yii\db\Expression('p.precio IS NULL');
+        // Para ordenar por precio se usa el precio en pesos que ve el público (con el dólar del día)
+        $cotizacion = Dolar::cotizacion();
+        $precioReal = $cotizacion !== null
+            ? 'CASE WHEN p.precio_fijo = 0 AND p.precio_usd IS NOT NULL THEN ROUND(p.precio_usd * ' . (float)$cotizacion . ') ELSE p.precio END'
+            : 'p.precio';
+        $sinPrecioAlFinal = new Expression("($precioReal) IS NULL");
         $q->orderBy(match ($orden) {
-            'categoria' => [new \yii\db\Expression('c.nombre IS NULL'), 'c.nombre' => SORT_ASC, 'p.creado_en' => SORT_DESC],
+            'categoria' => [new Expression('c.nombre IS NULL'), 'c.nombre' => SORT_ASC, 'p.creado_en' => SORT_DESC],
             'alfabetico' => ['p.titulo' => SORT_ASC],
-            'precio-menor' => [$sinPrecioAlFinal, 'p.precio' => SORT_ASC],
-            'precio-mayor' => [$sinPrecioAlFinal, 'p.precio' => SORT_DESC],
+            'precio-menor' => [$sinPrecioAlFinal, new Expression("($precioReal) ASC")],
+            'precio-mayor' => [$sinPrecioAlFinal, new Expression("($precioReal) DESC")],
             default => ['p.creado_en' => SORT_DESC, 'p.id' => SORT_DESC],
         });
 

@@ -62,9 +62,24 @@ Además, nadie puede quitarse a sí mismo el rol de administrador, desactivarse 
 - **Publicaciones:** grilla con filtros y ABM. Cada publicación lleva título, descripción, categoría, precio, talle, color, material, disponibilidad y hasta 10 fotos. La primera foto es la principal y se puede cambiar. Si el precio queda vacío, se muestra "Consultar". El precio se puede escribir como `12500`, `12.500` o `12.500,50`.
 - **Categorías:** ABM. Al borrar una categoría, sus publicaciones quedan sin categoría pero no se borran.
 - **Usuarios:** ABM con filtros.
-- **Datos del emprendimiento:** nombre, frase y foto del banner, descripción corta para compartir y datos de contacto (WhatsApp, teléfono, correo, dirección, horario, Instagram y Facebook).
+- **Datos del emprendimiento:** nombre, frase y foto del banner, descripción corta para compartir, datos de contacto (WhatsApp, teléfono, correo, dirección, horario, Instagram y Facebook) y qué dólar usar para los precios en dólares.
 - **Acerca de:** párrafos con una o varias fotos, que se pueden reordenar. En la página, el texto va a la izquierda y las fotos a la derecha, ajustadas a la altura del texto. En el celular se apilan.
-- **Estilo del sitio:** el estilo elegido vale para todos los visitantes. Hay 11 opciones: Genérico mixto, Viveros, Animales, Deportivo (rojo, azul, verde y naranja), Vehículos, Textil, Bazar y Tecnológico.
+- **Estilo del sitio:** el estilo elegido vale para todos los visitantes. Hay 13 opciones: Genérico mixto, Viveros, Animales, Deportivo (rojo, azul, verde y naranja), Vehículos, Textil, Bazar, Tecnológico, Burbujas y GERM.
+
+## Precios en dólares
+
+Cada publicación tiene la casilla **Precio fijo en pesos**, tildada por defecto. Si se destilda, se carga un **precio de referencia en dólares** y el público ve el precio en pesos calculado con la cotización del momento, redondeado a pesos enteros. La ficha aclara, por ejemplo, "US$ 25,50 pasados a pesos al dólar blue de hoy". El orden por precio también usa el precio calculado.
+
+- **De dónde sale la cotización:** de [dolarapi.com](https://dolarapi.com), gratis y sin clave, con el valor de venta. En Datos del emprendimiento se elige el dólar blue, oficial, MEP o tarjeta.
+- **Cada cuánto se consulta:** como mucho cada 30 minutos (componente `components/Dolar.php`). Si la API no responde, se usa la última cotización guardada y no se reintenta por 5 minutos. El botón **Actualizar ahora** la consulta en el momento.
+- **Cotización manual:** si se carga, se usa esa en lugar de la automática.
+- **Sin cotización:** si nunca se pudo obtener ninguna, las publicaciones en dólares muestran "Consultar".
+
+## Fotos desde el celular
+
+- Las fotos se comprimen en el navegador antes de subir (1600 px, o 1920 el banner, en JPG): una foto de celular de 8 MB queda en unos 300 KB. Después el servidor igual las procesa.
+- En celulares y tablets aparece el botón **Sacar foto**, que abre la cámara trasera. Cada foto se suma a las elegidas de la galería.
+- Si un envío supera el `post_max_size` de PHP, se avisa con un mensaje claro.
 
 ## Detalles técnicos
 
