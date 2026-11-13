@@ -30,11 +30,11 @@ window.Catalogo = (function () {
         };
     }
 
-    /* ---------- Filtros del catálogo: al cambiar categoría u orden se aplica solo ---------- */
+    /* ---------- Filtros del catálogo: al cambiar categoría, orden o Mostrar se aplica solo ---------- */
 
     document.addEventListener('change', function (e) {
         var form = e.target.closest('[data-filtros]');
-        if (form && e.target.tagName === 'SELECT') {
+        if (form && (e.target.tagName === 'SELECT' || e.target.type === 'checkbox')) {
             form.submit();
         }
     });

@@ -227,15 +227,14 @@ class Producto extends ActiveRecord
     }
 
     /**
-     * Productos del catálogo público con buscador, categoría y orden.
-     * $todos = true (usuario logueado): incluye los no disponibles.
+     * Productos del catálogo con buscador, categoría y orden.
+     * $estados: qué disponibilidades mostrar ([1] el público; [1, 0], [1], [0] o [] para quien está logueado).
+     * Con [] no se muestra nada.
      */
-    public static function catalogo(string $texto, ?int $categoria, string $orden, bool $todos): ActiveDataProvider
+    public static function catalogo(string $texto, ?int $categoria, string $orden, array $estados): ActiveDataProvider
     {
         $q = static::find()->alias('p')->joinWith('categoria c')->with('fotos');
-        if (!$todos) {
-            $q->andWhere(['p.disponible' => 1]);
-        }
+        $q->andWhere(['p.disponible' => $estados ?: [-1]]);
         if ($categoria) {
             $q->andWhere(['p.categoria_id' => $categoria]);
         }

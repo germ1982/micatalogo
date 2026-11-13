@@ -805,3 +805,11 @@ a:hover { color: var(--primario-hover); }
 .ficha-precio-usd { margin: -.75rem 0 1rem; font-size: .85rem; color: var(--texto-suave); }
 .bloque-precio { background: var(--superficie-2); border: 1px solid var(--borde); border-radius: var(--radio); padding: .9rem 1rem .1rem; margin-bottom: 1rem; }
 .cotizacion-actual strong { font-size: 1.2rem; }
+
+/* Filtro Habilitados / No habilitados (solo con sesión iniciada) */
+.filtro-estado { flex: 0 0 auto; margin: 0; padding: 0; border: 0; }
+.filtro-estado legend { float: none; width: auto; margin: 0 0 .1rem; font-size: .78rem; color: var(--texto-suave); }
+.filtro-estado .form-check { margin: 0; min-height: 0; font-size: .88rem; line-height: 1.35; }
+@media (max-width: 575.98px) {
+    .filtro-estado { flex: 1 1 100%; }
+}

@@ -7,6 +7,7 @@
  * @var string $q
  * @var int|null $categoria
  * @var string $orden
+ * @var array $ver ['si' => bool, 'no' => bool] Habilitados / No habilitados (solo con sesión)
  */
 
 use app\components\Fotos;
@@ -19,6 +20,12 @@ use yii\helpers\Url;
 $sitio = Emprendimiento::actual();
 $logueado = !Yii::$app->user->isGuest;
 $filtrando = $q !== '' || $categoria !== null;
+$ningunEstado = $logueado && !$ver['si'] && !$ver['no'];
+// "Quitar filtros" borra búsqueda y categoría, pero respeta el orden y Habilitados / No habilitados
+$sinFiltros = ['/site/index', 'orden' => $orden !== 'recientes' ? $orden : null];
+if ($logueado && !($ver['si'] && $ver['no'])) {
+    $sinFiltros += ['estado' => 1, 'ver' => array_keys(array_filter($ver))];
+}
 $urlCatalogo = Url::home(true);
 $this->params['og'] = ['url' => $urlCatalogo];
 ?>
@@ -49,6 +56,20 @@ $this->params['og'] = ['url' => $urlCatalogo];
             <span><i class="bi bi-sort-down"></i> Ordenar</span>
             <?= Html::dropDownList('orden', $orden, Producto::ORDENES, ['class' => 'form-select']) ?>
         </label>
+        <?php if ($logueado): ?>
+            <fieldset class="filtro-estado">
+                <legend><i class="bi bi-eye"></i> Mostrar</legend>
+                <?= Html::hiddenInput('estado', 1) ?>
+                <div class="form-check">
+                    <?= Html::checkbox('ver[]', $ver['si'], ['value' => 'si', 'id' => 'ver-si', 'class' => 'form-check-input']) ?>
+                    <label class="form-check-label" for="ver-si">Habilitados</label>
+                </div>
+                <div class="form-check">
+                    <?= Html::checkbox('ver[]', $ver['no'], ['value' => 'no', 'id' => 'ver-no', 'class' => 'form-check-input']) ?>
+                    <label class="form-check-label" for="ver-no">No habilitados</label>
+                </div>
+            </fieldset>
+        <?php endif; ?>
         <button type="submit" class="btn btn-primario"><i class="bi bi-search"></i><span class="d-md-none"> Buscar</span></button>
     <?= Html::endForm() ?>
 
@@ -56,7 +77,7 @@ $this->params['og'] = ['url' => $urlCatalogo];
         <div class="text-body-secondary small">
             <?= $productos->totalCount === 1 ? '1 publicación' : $productos->totalCount . ' publicaciones' ?>
             <?php if ($filtrando): ?>
-                · <?= Html::a('<i class="bi bi-x-circle"></i> Quitar filtros', ['/site/index', 'orden' => $orden !== 'recientes' ? $orden : null]) ?>
+                · <?= Html::a('<i class="bi bi-x-circle"></i> Quitar filtros', $sinFiltros) ?>
             <?php endif; ?>
         </div>
         <div class="d-flex flex-wrap align-items-center gap-2">
@@ -74,9 +95,13 @@ $this->params['og'] = ['url' => $urlCatalogo];
 
     <?php if ($productos->totalCount === 0): ?>
         <div class="vacio">
-            <i class="bi bi-search"></i>
-            <p><?= $filtrando ? 'No encontramos publicaciones con esa búsqueda.' : 'Todavía no hay publicaciones en el catálogo.' ?></p>
-            <?php if ($filtrando): ?>
+            <i class="bi <?= $ningunEstado ? 'bi-eye-slash' : 'bi-search' ?>"></i>
+            <p><?= match (true) {
+                $ningunEstado => 'Tildá "Habilitados", "No habilitados" o los dos para ver publicaciones.',
+                $filtrando => 'No encontramos publicaciones con esa búsqueda.',
+                default => 'Todavía no hay publicaciones en el catálogo.',
+            } ?></p>
+            <?php if ($filtrando && !$ningunEstado): ?>
                 <?= Html::a('Ver todo el catálogo', ['/site/index'], ['class' => 'btn btn-primario']) ?>
             <?php endif; ?>
         </div>

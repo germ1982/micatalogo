@@ -46,12 +46,22 @@ class SiteController extends Controller
         }
         $q = mb_substr(trim($q), 0, 100);
 
+        // Habilitados / no habilitados (solo con sesión iniciada). Las casillas destildadas no se
+        // envían, así que "estado=1" marca que el filtro se usó: sin él se muestran los dos.
+        $ver = ['si' => true, 'no' => true];
+        if ($logueado && Yii::$app->request->get('estado') !== null) {
+            $elegidos = (array)Yii::$app->request->get('ver', []);
+            $ver = ['si' => in_array('si', $elegidos, true), 'no' => in_array('no', $elegidos, true)];
+        }
+        $estados = $logueado ? array_keys(array_filter([1 => $ver['si'], 0 => $ver['no']])) : [1];
+
         return $this->render('index', [
-            'productos' => Producto::catalogo($q, $categoria, $orden, $logueado),
+            'productos' => Producto::catalogo($q, $categoria, $orden, $estados),
             'categorias' => Categoria::listaConProductos($logueado),
             'q' => $q,
             'categoria' => $categoria,
             'orden' => $orden,
+            'ver' => $ver,
         ]);
     }
 
