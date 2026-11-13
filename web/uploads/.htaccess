@@ -1,0 +1,8 @@
+# Las fotos se sirven como archivos: en esta carpeta nunca se ejecuta código
+<FilesMatch "\.(php|phtml|phar|pl|py|cgi|sh)$">
+    Require all denied
+</FilesMatch>
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+Options -Indexes

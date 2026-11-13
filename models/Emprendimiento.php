@@ -1,0 +1,124 @@
+<?php
+
+namespace app\models;
+
+use app\components\Fotos;
+use Yii;
+use yii\db\ActiveRecord;
+use yii\web\UploadedFile;
+
+/**
+ * Datos del emprendimiento: una sola fila con nombre, banner, contacto y estilo del sitio.
+ *
+ * @property int $id
+ * @property string $nombre
+ * @property string|null $eslogan
+ * @property string|null $descripcion
+ * @property string|null $banner
+ * @property string|null $whatsapp
+ * @property string|null $telefono
+ * @property string|null $email
+ * @property string|null $direccion
+ * @property string|null $horario
+ * @property string|null $instagram
+ * @property string|null $facebook
+ * @property string $tema
+ */
+class Emprendimiento extends ActiveRecord
+{
+    /** @var UploadedFile|null */
+    public $bannerNuevo;
+
+    private static ?Emprendimiento $_actual = null;
+
+    public static function tableName()
+    {
+        return '{{%emprendimiento}}';
+    }
+
+    /** Los datos del sitio (se leen una sola vez por pedido) */
+    public static function actual(): self
+    {
+        if (self::$_actual === null) {
+            self::$_actual = static::find()->orderBy('id')->one()
+                ?? new static(['nombre' => 'Mi Catálogo', 'tema' => Yii::$app->params['temaPredeterminado']]);
+        }
+
+        return self::$_actual;
+    }
+
+    public function rules()
+    {
+        $textos = ['nombre', 'eslogan', 'descripcion', 'whatsapp', 'telefono', 'email', 'direccion', 'horario', 'instagram', 'facebook'];
+
+        return [
+            [$textos, 'trim'],
+            ['nombre', 'required'],
+            ['nombre', 'string', 'max' => 80],
+            ['eslogan', 'string', 'max' => 160],
+            ['descripcion', 'string', 'max' => 300],
+            ['whatsapp', 'filter', 'filter' => fn($v) => preg_replace('/\D+/', '', (string)$v)],
+            ['whatsapp', 'string', 'min' => 8, 'max' => 20, 'tooShort' => 'Escribí el número completo con código de país, por ejemplo 5492991234567.'],
+            ['telefono', 'string', 'max' => 40],
+            ['email', 'email'],
+            [['direccion', 'horario'], 'string', 'max' => 160],
+            ['instagram', 'match', 'pattern' => '/^@?[\w.]{1,60}$/', 'message' => 'Escribí solo el usuario de Instagram (ej. miemprendimiento).'],
+            ['instagram', 'filter', 'filter' => fn($v) => ltrim((string)$v, '@')],
+            ['facebook', 'url', 'defaultScheme' => 'https'],
+            ['tema', 'in', 'range' => array_keys(Yii::$app->params['temas'])],
+            [array_diff($textos, ['nombre']), 'default', 'value' => null],
+            ['bannerNuevo', 'image', 'skipOnEmpty' => true, 'extensions' => 'jpg, jpeg, png, webp',
+                'checkExtensionByMimeType' => true, 'maxSize' => Yii::$app->params['fotoMaximoMb'] * 1024 * 1024],
+        ];
+    }
+
+    public function attributeLabels()
+    {
+        return [
+            'nombre' => 'Nombre del emprendimiento',
+            'eslogan' => 'Frase del banner',
+            'descripcion' => 'Descripción corta (se ve al compartir el link)',
+            'whatsapp' => 'WhatsApp (con código de país, ej. 5492991234567)',
+            'telefono' => 'Teléfono',
+            'email' => 'Correo electrónico',
+            'direccion' => 'Dirección',
+            'horario' => 'Horario de atención',
+            'instagram' => 'Instagram (usuario)',
+            'facebook' => 'Facebook (link de la página)',
+            'tema' => 'Estilo del sitio',
+            'bannerNuevo' => 'Imagen del banner',
+        ];
+    }
+
+    /** Guarda el banner subido (si hay) reemplazando el anterior. Devuelve el error o null */
+    public function guardarBanner(): ?string
+    {
+        if (!$this->bannerNuevo) {
+            return null;
+        }
+        $r = Fotos::guardar($this->bannerNuevo, 'banner', Yii::$app->params['fotoLadoBanner']);
+        if (is_string($r)) {
+            return $r;
+        }
+        Fotos::borrar($r[1]);   // el banner no usa miniatura
+        Fotos::borrar($this->banner);
+        $this->updateAttributes(['banner' => $r[0]]);
+
+        return null;
+    }
+
+    public function quitarBanner(): void
+    {
+        Fotos::borrar($this->banner);
+        $this->updateAttributes(['banner' => null]);
+    }
+
+    public function getWhatsappUrl(string $texto = ''): ?string
+    {
+        if (!$this->whatsapp) {
+            return null;
+        }
+
+        return 'https://wa.me/' . $this->whatsapp . ($texto !== '' ? '?text=' . rawurlencode($texto) : '');
+    }
+}

@@ -1,0 +1,5 @@
+# Mi Catálogo: el proyecto completo va en la raíz del hosting.
+# Desde el navegador solo se ve web/; el código, la configuración y .env no.
+Options -Indexes
+RewriteEngine On
+RewriteRule ^(?!web/)(.*)$ web/$1 [L]

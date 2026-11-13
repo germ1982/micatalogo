@@ -1,0 +1,14 @@
+#!/usr/bin/env php
+<?php
+
+$env = require __DIR__ . '/config/env.php';
+
+defined('YII_DEBUG') or define('YII_DEBUG', !empty($env['DEBUG']));
+defined('YII_ENV') or define('YII_ENV', YII_DEBUG ? 'dev' : 'prod');
+
+require __DIR__ . '/vendor/autoload.php';
+require __DIR__ . '/vendor/yiisoft/yii2/Yii.php';
+
+$config = require __DIR__ . '/config/console.php';
+
+exit((new yii\console\Application($config))->run());

@@ -1,0 +1,27 @@
+{
+    "name": "germ/micatalogo",
+    "description": "Mi Catálogo - catálogo online de un emprendimiento",
+    "type": "project",
+    "license": "proprietary",
+    "minimum-stability": "stable",
+    "require": {
+        "php": ">=8.1",
+        "yiisoft/yii2": "~2.0.54",
+        "yiisoft/yii2-bootstrap5": "~2.0.2"
+    },
+    "require-dev": {
+        "yiisoft/yii2-debug": "~2.1.0"
+    },
+    "config": {
+        "allow-plugins": {
+            "yiisoft/yii2-composer": true
+        },
+        "process-timeout": 1800
+    },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://asset-packagist.org"
+        }
+    ]
+}

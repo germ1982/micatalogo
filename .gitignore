@@ -1,0 +1,9 @@
+/vendor/
+.env
+*.zip
+.idea
+.vscode
+Thumbs.db
+.DS_Store
+/web/uploads/*
+!/web/uploads/.htaccess
