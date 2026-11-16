@@ -1,0 +1,250 @@
+==========================================================================
+ CÓMO PUBLICAR MI CATÁLOGO EN LOS SITIOS DE LOS CLIENTES
+==========================================================================
+
+Un mismo código sirve para todos los clientes. Cada sitio tiene su propio
+.env (datos de la base y claves), su base de datos, sus fotos y su estilo.
+
+Esta carpeta (deploy/) queda SOLO EN TU PC. Nunca se sube a los sitios.
+
+  publicar.php          el script que publica
+  sitios.ini            los datos de cada sitio (FTP y base). Tiene
+                        contraseñas: NO va al repositorio (.gitignore)
+  sitios.example.ini    plantilla para armar sitios.ini
+  estado/<sitio>.json   lo que el script anota como ya subido a cada sitio
+  micatalogo.zip        lo arma --zip; borralo después de usarlo
+
+Todos los comandos se corren desde la carpeta del proyecto
+(C:\xampp\htdocs\micatalogo) y siempre empiezan con "php":
+
+  php deploy/publicar.php ...
+
+Si PowerShell no reconoce "php", usá la ruta completa:
+
+  C:\xampp\php\php.exe deploy/publicar.php ...
+
+
+--------------------------------------------------------------------------
+ 1. PREPARAR EL HOSTING (una vez por cliente)
+--------------------------------------------------------------------------
+
+Si usás InfinityFree:
+
+  1. En el panel de InfinityFree, creá el dominio o subdominio
+     (por ejemplo cliente.rf.gd).
+  2. En "MySQL Databases", creá la base (por ejemplo if0_XXXXXXX_cliente).
+  3. En "Account Details" anotá:
+       - FTP Hostname         (ftpupload.net)
+       - FTP Username         (if0_XXXXXXX)
+       - FTP / vPanel Password  (es la misma para FTP y para la base)
+       - MySQL Hostname       (sqlXXX.infinityfree.com)  -> NO es "localhost"
+       - MySQL Username       (if0_XXXXXXX)
+
+Con otro hosting es lo mismo: un dominio, una base MySQL/MariaDB y un
+acceso FTP. Necesita PHP 8.1 o más nuevo, con gd, exif y fileinfo.
+
+
+--------------------------------------------------------------------------
+ 2. AGREGAR EL SITIO EN sitios.ini
+--------------------------------------------------------------------------
+
+Si sitios.ini no existe, copiá sitios.example.ini con ese nombre.
+Agregá un bloque por cliente; el nombre entre corchetes es el que usás
+en los comandos:
+
+  [cliente]
+  url = "https://cliente.rf.gd"
+  ftp_host = "ftpupload.net"
+  ftp_usuario = "if0_XXXXXXX"
+  ftp_clave = "..."
+  ftp_carpeta = "/cliente.rf.gd/htdocs"
+  ftp_tls = 0
+  db_host = "sqlXXX.infinityfree.com"
+  db_nombre = "if0_XXXXXXX_cliente"
+  db_usuario = "if0_XXXXXXX"
+  db_clave = "..."
+
+
+--------------------------------------------------------------------------
+ 3. PROYECTO NUEVO: PRIMERA SUBIDA (con zip, que es mucho más rápido)
+--------------------------------------------------------------------------
+
+El FTP de InfinityFree es muy lento con muchos archivos (son unos 1.200).
+Por eso la primera vez conviene subir un zip.
+
+  Paso 1. Armar el zip:
+
+            php deploy/publicar.php --zip
+
+          Tiene que terminar con:
+          "Listo: deploy/micatalogo.zip (1229 archivos, 3,7 MB)"
+
+  Paso 2. En el administrador de archivos del hosting:
+          - Entrá a la carpeta del sitio (htdocs).
+          - Subí deploy/micatalogo.zip.
+          - Descomprimilo AHÍ MISMO: web/, vendor/, .htaccess, etc. tienen
+            que quedar directamente en htdocs, no dentro de una subcarpeta.
+          - Borrá el zip del servidor.
+          - IMPORTANTE: si en htdocs hay un .env viejo, borralo. El script
+            arma el .env solo cuando NO existe; si hay uno viejo lo deja como
+            está y el sitio no se conecta a la base.
+
+  Paso 3. Avisarle al script que los archivos ya están:
+
+            php deploy/publicar.php cliente --ya-subido
+
+          Hace tres cosas:
+          - Anota en deploy/estado/cliente.json que el sitio ya tiene todos
+            los archivos (no sube nada).
+          - Entra por FTP y crea el .env del sitio con los datos de la base
+            de sitios.ini, DEBUG = 0, COOKIE_KEY al azar y una
+            MANTENIMIENTO_CLAVE al azar. Tiene que decir
+            "Se creó el .env del sitio".
+          - Intenta crear las tablas. En InfinityFree falla (el hosting frena
+            a los programas que no son un navegador) y muestra un link:
+
+              https://cliente.rf.gd/mantenimiento?clave=...
+
+  Paso 4. Abrí ese link en el navegador y tocá "Aplicar actualizaciones":
+          crea todas las tablas. La base nueva queda SIN USUARIOS.
+
+  Paso 4b. Crear el primer administrador (en hostings sin consola
+          reemplaza a "php yii admin/crear"):
+          - En la misma página, cuando dice "La base de datos está al día",
+            aparece el botón "Crear el primer administrador".
+            También se puede ir directo a:
+              https://cliente.rf.gd/mantenimiento/instalar?clave=...
+            (la misma clave del link de mantenimiento).
+          - Completá usuario, nombre y la contraseña dos veces y guardá.
+            Te deja logueado y te lleva al panel.
+          - Esa página solo funciona mientras el sitio NO tenga ningún
+            usuario. Si no aparece el botón es porque hay actualizaciones
+            pendientes (aplicalas primero) o porque ya hay un usuario (en
+            ese caso entrá con "Ingresar").
+          - Los demás usuarios (administradores o editores) se crean
+            después desde el panel, en "Usuarios".
+
+  Paso 5. Entrá al sitio con "Ingresar" (pie de página) y en el panel
+          cargá los datos del emprendimiento, el banner y el estilo.
+
+  OJO: poné siempre el nombre del sitio con --ya-subido. Sin nombre marca
+  como subidos TODOS los sitios de sitios.ini, aunque a alguno no le hayas
+  subido el zip. Si te pasa, se arregla con:  php deploy/publicar.php
+  ese_sitio --todo
+
+
+--------------------------------------------------------------------------
+ 4. TODOS LOS PARÁMETROS
+--------------------------------------------------------------------------
+
+  php deploy/publicar.php
+        Publica en TODOS los sitios de sitios.ini.
+
+  php deploy/publicar.php cliente
+  php deploy/publicar.php cliente otro
+        Publica solo en esos sitios.
+
+  --simular
+        Muestra qué archivos subiría, sin subir nada. Usalo antes de
+        publicar para ver que suba solo lo que cambiaste.
+
+  --todo
+        Vuelve a subir TODOS los archivos, aunque estén anotados como
+        subidos. Sirve si un sitio quedó desactualizado o con archivos rotos.
+
+  --zip
+        Arma deploy/micatalogo.zip con lo mismo que subiría por FTP.
+        No toca ningún sitio.
+
+  --ya-subido
+        Anota que el sitio ya tiene todos los archivos (porque subiste el
+        zip), arma o completa el .env y da el link de la base. No sube nada.
+
+  SITIOS_INI=otro.ini
+        Variable de entorno para usar otro archivo de sitios (pruebas).
+        En PowerShell:  $env:SITIOS_INI="otro.ini"; php deploy/publicar.php
+
+  Lo que el script NUNCA toca en los sitios: el .env (salvo crearlo si no
+  existe o agregarle la clave de mantenimiento si le falta), las fotos
+  (web/uploads) y runtime/.
+
+  Lo que NUNCA sube: deploy/, .git, README.md, .env*, composer.json/lock,
+  yii, commands/ y las partes de vendor/ que no se usan en producción.
+
+
+--------------------------------------------------------------------------
+ 5. ACTUALIZAR LOS SITIOS DESPUÉS DE CADA CAMBIO
+--------------------------------------------------------------------------
+
+A) Cambios de código (vistas, CSS, controladores, modelos...)
+
+     1. Hacé y probá el cambio en tu PC (http://localhost/micatalogo).
+     2. Mirá qué va a subir:
+          php deploy/publicar.php --simular
+     3. Publicá:
+          php deploy/publicar.php            (todos)
+          php deploy/publicar.php cliente    (uno solo)
+     4. Mirá el sitio. Si no ves el cambio, recargá con Ctrl+F5
+        (InfinityFree a veces cachea).
+
+   El script compara una huella (md5) de cada archivo con lo anotado en
+   deploy/estado/<sitio>.json y sube SOLO lo que cambió. No hace falta
+   armar otro zip.
+
+B) Cambios en la base de datos (tablas o columnas nuevas)
+
+   NUNCA cambies las tablas a mano en phpMyAdmin: siempre con una migración.
+
+     1. En tu PC, creá la migración:
+          php yii migrate/create nombre_del_cambio
+        Se crea un archivo en migrations/. Escribí el cambio en safeUp()
+        y cómo deshacerlo en safeDown().
+     2. Aplicala en tu PC y probá:
+          php yii migrate
+     3. Publicá como siempre:
+          php deploy/publicar.php
+        Esto sube el archivo de la migración y al final intenta aplicarla.
+        En InfinityFree falla y muestra un link por cada sitio.
+     4. Aplicala en cada sitio, de una de estas dos formas:
+        - Abrí el link de mantenimiento y tocá "Aplicar actualizaciones".
+        - O entrá al panel como administrador: aparece un aviso
+          "Hay actualizaciones pendientes" con el botón "Aplicar ahora".
+
+   El link de mantenimiento de cada sitio siempre es el mismo
+   (https://sitio/mantenimiento?clave=...), porque la clave está en su .env.
+   No lo compartas.
+
+   ¿Qué va en lugar de los "..." de "clave=..."? La MANTENIMIENTO_CLAVE del
+   sitio (32 letras y números). Si no la tenés a mano:
+     - Abrí el .env del sitio en el administrador de archivos y buscá la
+       línea MANTENIMIENTO_CLAVE = ...
+     - O corré  php deploy/publicar.php sitio : al final muestra el link
+       completo (si no hay cambios, no sube nada).
+
+
+--------------------------------------------------------------------------
+ 6. PROBLEMAS CONOCIDOS
+--------------------------------------------------------------------------
+
+"SQLSTATE[HY000] [2002] No such file or directory"
+   El .env del sitio tiene mal la base (seguro dice localhost). Borrá el
+   .env del servidor y corré:  php deploy/publicar.php sitio --ya-subido
+   (o sin --ya-subido si querés que también suba lo que cambió).
+   Usá el link nuevo que muestra: la clave cambia.
+
+"Falló m..._xxx: ... Column already exists" o "Table already exists"
+   Ese cambio ya está en la base (se hizo a mano) pero no quedó anotado.
+   En phpMyAdmin, con la base del sitio elegida, pestaña SQL:
+     INSERT INTO migration (version, apply_time)
+     VALUES ('m..._xxx', UNIX_TIMESTAMP());
+   (con el nombre exacto que dice el error) y volvé a abrir el link.
+
+Corrí "deploy/publicar.php" y se abrió el archivo en el editor
+   Falta "php" adelante:  php deploy/publicar.php
+
+Un sitio no recibe los cambios nuevos
+   Probablemente quedó anotado como subido sin estarlo. Corré:
+     php deploy/publicar.php sitio --todo
+
+No borres ni vacíes los .json de deploy/estado/ a mano: si querés que un
+sitio reciba todo de nuevo, usá --todo.
