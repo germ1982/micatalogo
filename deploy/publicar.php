@@ -326,7 +326,7 @@ class DestinoLocal extends Destino
 
 class DestinoFtp extends Destino
 {
-    private $ftp;
+    private ?\FTP\Connection $ftp = null;
     private array $carpetas = [];
 
     public function __construct(private array $s)
@@ -337,8 +337,9 @@ class DestinoFtp extends Destino
     private function conectar(): void
     {
         $tls = !empty($this->s['ftp_tls']) && function_exists('ftp_ssl_connect');
-        $this->ftp = $tls ? @ftp_ssl_connect($this->s['ftp_host'], 21, 30) : @ftp_connect($this->s['ftp_host'], 21, 30);
-        $this->ftp || throw new RuntimeException("no se pudo conectar a {$this->s['ftp_host']}");
+        $conexion = $tls ? @ftp_ssl_connect($this->s['ftp_host'], 21, 30) : @ftp_connect($this->s['ftp_host'], 21, 30);
+        $conexion || throw new RuntimeException("no se pudo conectar a {$this->s['ftp_host']}");
+        $this->ftp = $conexion;
         @ftp_login($this->ftp, $this->s['ftp_usuario'] ?? '', $this->s['ftp_clave'] ?? '')
             || throw new RuntimeException('usuario o contraseña de FTP incorrectos');
         ftp_pasv($this->ftp, true);
