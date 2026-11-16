@@ -180,6 +180,12 @@ class Producto extends ActiveRecord
         return Url::to(['/site/producto', 'id' => $this->id, 'slug' => $this->getSlug()], $absoluta);
     }
 
+    /** Link para compartir (termina en /foto.jpg para que se vea la vista previa: ver SiteController::actionTarjeta) */
+    public function getUrlCompartir(): string
+    {
+        return Url::to(['/site/tarjeta', 'id' => $this->id, 'slug' => $this->getSlug()], true);
+    }
+
     /** ¿El precio en pesos sale del precio en dólares y la cotización del día? */
     public function getUsaDolar(): bool
     {

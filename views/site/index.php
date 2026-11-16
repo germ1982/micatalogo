@@ -101,7 +101,8 @@ $this->params['og'] = ['url' => $urlCatalogo];
                     ['class' => 'btn btn-primario btn-sm']) ?>
             <?php endif; ?>
             <?= $this->render('/layouts/_compartir', [
-                'url' => $urlCatalogo,
+                'url' => Url::to(['/site/tarjeta'], true),
+                'foto' => $bannerGeneral ? Fotos::url($bannerGeneral) : null,
                 'texto' => 'Mirá el catálogo de ' . $sitio->nombre,
                 'titulo' => $sitio->nombre,
             ]) ?>

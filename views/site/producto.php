@@ -111,9 +111,10 @@ $this->params['og'] = [
                 <div class="mt-3">
                     <small class="text-body-secondary d-block mb-2">Compartir esta publicación</small>
                     <?= $this->render('/layouts/_compartir', [
-                        'url' => $url,
+                        'url' => $producto->getUrlCompartir(),
                         'texto' => $producto->titulo . ' · ' . $producto->precioTexto,
                         'titulo' => $producto->titulo,
+                        'foto' => $fotos ? Fotos::url($fotos[0]->archivo) : null,
                     ]) ?>
                 </div>
                 <small class="text-body-secondary d-block mt-3">Publicado el <?= Yii::$app->formatter->asDate($producto->creado_en) ?></small>

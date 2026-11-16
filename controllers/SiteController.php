@@ -4,11 +4,14 @@ namespace app\controllers;
 
 use app\models\AcercaParrafo;
 use app\models\Categoria;
+use app\models\Emprendimiento;
 use app\models\LoginForm;
 use app\models\Producto;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
+use yii\helpers\StringHelper;
+use yii\helpers\Url;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 
@@ -77,6 +80,43 @@ class SiteController extends Controller
         }
 
         return $this->render('producto', ['producto' => $producto]);
+    }
+
+    /**
+     * Tarjeta para compartir (vista previa de WhatsApp, Facebook...): solo las etiquetas
+     * Open Graph y una redirección inmediata a la ficha o al catálogo.
+     *
+     * InfinityFree frena a los programas que no ejecutan JavaScript (los robots de las
+     * vistas previas) en todas las páginas, salvo en las direcciones que terminan como un
+     * archivo de imagen. Por eso esta dirección termina en .jpg, aunque devuelve HTML.
+     */
+    public function actionTarjeta(?int $id = null)
+    {
+        $sitio = Emprendimiento::actual();
+        $datos = [
+            'titulo' => $sitio->nombre,
+            'descripcion' => $sitio->descripcion ?: ($sitio->eslogan ?: 'Catálogo online de ' . $sitio->nombre),
+            'imagen' => $sitio->banner ?: $sitio->banner_movil,
+            'destino' => Url::home(true),
+            'tipo' => 'website',
+        ];
+        if ($id !== null) {
+            $producto = Producto::find()->with('fotos')->where(['id' => $id])->one();
+            if (!$producto || (!$producto->disponible && Yii::$app->user->isGuest)) {
+                throw new NotFoundHttpException('Esta publicación no existe o ya no está disponible.');
+            }
+            $resumen = StringHelper::truncate(preg_replace('/\s+/u', ' ', (string)$producto->descripcion), 180);
+            $datos = [
+                'titulo' => $producto->titulo . ' · ' . $producto->precioTexto,
+                'descripcion' => $resumen ?: 'Mirá esta publicación en el catálogo de ' . $sitio->nombre,
+                'imagen' => $producto->fotos ? $producto->fotos[0]->archivo : $datos['imagen'],
+                'destino' => $producto->getUrl(true),
+                'tipo' => 'product',
+            ];
+        }
+        Yii::$app->response->headers->set('X-Robots-Tag', 'noindex');
+
+        return $this->renderPartial('tarjeta', $datos + ['sitio' => $sitio]);
     }
 
     public function actionAcerca()

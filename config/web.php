@@ -80,6 +80,11 @@ $config = [
                 'contacto' => 'site/contacto',
                 'ingresar' => 'site/ingresar',
                 'salir' => 'site/salir',
+                // Links para compartir: terminan en .jpg para que el filtro anti-robots de
+                // InfinityFree deje pasar a WhatsApp/Facebook (ver SiteController::actionTarjeta)
+                // (la del producto va primero: si no, Yii armaría catalogo.jpg?id=...)
+                'producto/<id:\d+>-<slug:[\w\-]*>/foto.jpg' => 'site/tarjeta',
+                'catalogo.jpg' => 'site/tarjeta',
                 'producto/<id:\d+>-<slug:[\w\-]*>' => 'site/producto',
                 'producto/<id:\d+>' => 'site/producto',
 

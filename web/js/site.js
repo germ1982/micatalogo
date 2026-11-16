@@ -72,19 +72,54 @@ window.Catalogo = (function () {
         });
     });
 
+    /*
+     * Menú de compartir del celular. Si el botón tiene data-foto y el navegador lo permite
+     * (Android e iPhone), se manda la foto como archivo: WhatsApp la muestra grande, con el
+     * texto y el link de epígrafe, sin depender de la vista previa del link.
+     * La foto se baja al cargar la página porque navigator.share() tiene que llamarse
+     * enseguida del toque: si se esperara la descarga, el navegador lo rechaza.
+     */
+    var archivosFoto = new WeakMap();
+
+    function prepararFoto(boton) {
+        var url = boton.getAttribute('data-foto');
+        if (!url || !navigator.canShare || typeof File === 'undefined') { return; }
+        fetch(url).then(function (r) { return r.ok ? r.blob() : Promise.reject(); }).then(function (blob) {
+            var tipo = blob.type || 'image/jpeg';
+            var nombre = 'foto.' + (tipo.split('/')[1] || 'jpg').replace('jpeg', 'jpg');
+            var archivo = new File([blob], nombre, { type: tipo });
+            if (navigator.canShare({ files: [archivo] })) {
+                archivosFoto.set(boton, archivo);
+                boton.querySelector('.etiqueta-foto') && boton.querySelector('.etiqueta-foto').classList.remove('d-none');
+                boton.title = 'Compartir con la foto';
+            }
+        }).catch(function () { /* sin foto: se comparte solo el link */ });
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         if (!navigator.share) { return; }
-        document.querySelectorAll('[data-compartir-nativo]').forEach(function (b) { b.classList.remove('d-none'); });
+        document.querySelectorAll('[data-compartir-nativo]').forEach(function (b) {
+            b.classList.remove('d-none');
+            prepararFoto(b);
+        });
     });
 
     document.addEventListener('click', function (e) {
         var boton = e.target.closest('[data-compartir-nativo]');
         if (!boton || !navigator.share) { return; }
-        navigator.share({
-            title: boton.getAttribute('data-titulo'),
-            text: boton.getAttribute('data-texto'),
-            url: boton.getAttribute('data-url')
-        }).catch(function () { /* el usuario canceló */ });
+        var texto = boton.getAttribute('data-texto');
+        var url = boton.getAttribute('data-url');
+        var archivo = archivosFoto.get(boton);
+        // Con archivos, varias apps ignoran "url": el link va dentro del texto
+        var datos = archivo
+            ? { files: [archivo], title: boton.getAttribute('data-titulo'), text: texto + '\n' + url }
+            : { title: boton.getAttribute('data-titulo'), text: texto, url: url };
+        navigator.share(datos).catch(function (error) {
+            if (archivo && error && error.name !== 'AbortError') {
+                // Si falló con la foto, se intenta solo con el link
+                navigator.share({ title: datos.title, text: texto, url: url }).catch(function () {});
+            }
+        });
     });
 
     /* ---------- Galería de la ficha ---------- */

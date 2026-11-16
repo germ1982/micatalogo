@@ -112,6 +112,12 @@ Cada publicación tiene la casilla **Precio fijo en pesos**, tildada por defecto
 - **Cotización manual:** si se carga, se usa esa en lugar de la automática.
 - **Sin cotización:** si nunca se pudo obtener ninguna, las publicaciones en dólares muestran "Consultar".
 
+## Compartir con foto
+
+- **Links para compartir:** los botones de compartir no usan el link de la ficha, sino uno que termina en `/foto.jpg` (`/producto/3-disco.../foto.jpg`, y `/catalogo.jpg` para el catálogo). Esa dirección devuelve solo la "tarjeta" con las etiquetas Open Graph y manda enseguida a la persona a la ficha (`SiteController::actionTarjeta`, vista `site/tarjeta.php`).
+  - **Por qué:** InfinityFree frena con un JavaScript a todos los programas que no son un navegador, incluidos los robots de WhatsApp y Facebook que arman la vista previa. Solo deja pasar las direcciones que parecen imágenes (`.jpg`, `.png`, `.css`), y por eso la vista previa sale con foto. Depende de cómo filtra InfinityFree hoy: si lo cambian, el link sigue funcionando, pero sin vista previa. En otros hostings no hace falta, aunque tampoco molesta.
+- **Foto como archivo:** en el celular, el botón **Con foto** del menú de compartir manda la primera foto (o el banner, para el catálogo) como archivo, con el título, el precio y el link de epígrafe. No depende de la vista previa. La foto se baja al cargar la página, porque el navegador exige que el menú se abra apenas se toca el botón.
+
 ## Fotos desde el celular
 
 - Las fotos se comprimen en el navegador antes de subir (1600 px, o 1920 el banner, en JPG): una foto de celular de 8 MB queda en unos 300 KB. Después el servidor igual las procesa.

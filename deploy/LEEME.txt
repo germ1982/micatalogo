@@ -239,6 +239,14 @@ B) Cambios en la base de datos (tablas o columnas nuevas)
      VALUES ('m..._xxx', UNIX_TIMESTAMP());
    (con el nombre exacto que dice el error) y volvé a abrir el link.
 
+Al compartir por WhatsApp no aparece la foto (solo "sitio.rf.gd")
+   InfinityFree frena a los robots que arman la vista previa. Los botones
+   de compartir del sitio ya usan links que terminan en /foto.jpg, que sí
+   pasan. Si pegás a mano el link de la ficha (sin /foto.jpg), no hay
+   vista previa. En el celular, el botón "Con foto" manda la foto misma.
+   WhatsApp guarda las vistas previas un tiempo: si un link ya se compartió
+   sin foto, puede seguir saliendo sin foto un rato.
+
 Corrí "deploy/publicar.php" y se abrió el archivo en el editor
    Falta "php" adelante:  php deploy/publicar.php
 
