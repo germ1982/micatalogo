@@ -43,6 +43,23 @@ $this->title = 'Datos del emprendimiento';
         <?php endif; ?>
     </div>
 </div>
+<div class="row align-items-end">
+    <div class="col-md-6">
+        <?= $form->field($datos, 'bannerMovilNuevo')->fileInput(['accept' => 'image/jpeg,image/png,image/webp', 'class' => 'form-control', 'data-comprimir' => Yii::$app->params['fotoLadoBanner']])
+            ->hint('Una imagen más alta que ancha (por ejemplo 1080 × 1000) para celulares. Si no cargás ninguna, en el celular se usa el banner de arriba.') ?>
+    </div>
+    <div class="col-md-6 mb-3">
+        <?php if ($datos->banner_movil): ?>
+            <div class="banner-actual">
+                <img src="<?= Html::encode(Fotos::url($datos->banner_movil)) ?>" alt="Banner para celular" class="movil">
+                <?= Html::a('<i class="bi bi-trash"></i> Quitar', ['quitar-banner', 'cual' => 'banner_movil'], [
+                    'class' => 'btn btn-sm btn-danger', 'data-method' => 'post', 'data-form' => 'form-aparte',
+                    'data-confirm' => '¿Quitar el banner para celular?',
+                ]) ?>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>
 
 <h2 class="h6 subtitulo-panel mt-3">Contacto</h2>
 <div class="row">

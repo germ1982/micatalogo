@@ -19,14 +19,16 @@ class EmprendimientoController extends PanelController
         $datos = Emprendimiento::actual();
         if ($datos->load(Yii::$app->request->post())) {
             $datos->bannerNuevo = UploadedFile::getInstance($datos, 'bannerNuevo');
+            $datos->bannerMovilNuevo = UploadedFile::getInstance($datos, 'bannerMovilNuevo');
             $cambioDolar = $datos->isAttributeChanged('dolar_tipo');
             if ($datos->save()) {
                 if ($cambioDolar) {
                     Dolar::actualizar($datos);
                 }
-                $error = $datos->guardarBanner();
-                Yii::$app->session->setFlash($error ? 'warning' : 'success',
-                    $error ? 'Los datos se guardaron, pero el banner no: ' . Html::encode($error) : 'Datos guardados.');
+                $errores = $datos->guardarBanners();
+                Yii::$app->session->setFlash($errores ? 'warning' : 'success', $errores
+                    ? 'Los datos se guardaron, pero el banner no: ' . implode(' ', array_map([Html::class, 'encode'], $errores))
+                    : 'Datos guardados.');
 
                 return $this->refresh();
             }
@@ -35,10 +37,11 @@ class EmprendimientoController extends PanelController
         return $this->render('index', ['datos' => $datos]);
     }
 
-    public function actionQuitarBanner()
+    public function actionQuitarBanner(string $cual = 'banner')
     {
-        Emprendimiento::actual()->quitarBanner();
-        Yii::$app->session->setFlash('success', 'Se quitó la imagen del banner.');
+        $movil = $cual === 'banner_movil';
+        Emprendimiento::actual()->quitarBanner($movil ? 'banner_movil' : 'banner');
+        Yii::$app->session->setFlash('success', $movil ? 'Se quitó el banner para celular.' : 'Se quitó la imagen del banner.');
 
         return $this->redirect(['index']);
     }

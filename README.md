@@ -47,6 +47,43 @@ Quien está logueado ve todo el catálogo, con marcas de disponible o no disponi
 
 En un hosting, el proyecto completo va en la carpeta del sitio. El `.htaccess` de la raíz manda todo a `web/`, así que el código, la configuración y `.env` no quedan expuestos.
 
+## Publicar en los sitios de los clientes (InfinityFree u otro hosting con FTP)
+
+Un mismo código sirve para todos los clientes: cada sitio tiene su propio `.env`, su base, sus fotos y su estilo.
+
+### Configuración (una sola vez)
+
+Copiá `deploy/sitios.example.ini` como `deploy/sitios.ini` y agregá un bloque por cliente con los datos de FTP y de la base. Ese archivo tiene contraseñas, así que **queda solo en tu PC**: está en el `.gitignore`.
+
+### Publicar
+
+```bash
+php deploy/publicar.php
+```
+
+- Sin parámetros publica en todos los sitios. Para algunos: `php deploy/publicar.php arteverde otro`.
+- `--simular` muestra qué subiría sin subir nada, y `--todo` vuelve a subir todos los archivos.
+- Sube solo los archivos que cambiaron desde la última vez; lo lleva en `deploy/estado/<sitio>.json`.
+- **Nunca toca** el `.env`, las fotos (`web/uploads`) ni `runtime/` de los sitios.
+- Incluye `vendor/`, porque en InfinityFree no hay composer, pero sin lo que no se usa en producción: barra de depuración, fuentes de Bootstrap, documentación y tests. Son unos 1.200 archivos, y la primera subida tarda varios minutos.
+
+### Sitio nuevo
+
+1. Creá el dominio o subdominio y la base en el hosting.
+2. Agregá su bloque en `deploy/sitios.ini`.
+3. Corré `php deploy/publicar.php nombre`. La primera vez sube todo y arma el `.env` del sitio: datos de la base, `COOKIE_KEY` al azar, `DEBUG = 0` y una `MANTENIMIENTO_CLAVE` al azar.
+4. Actualizá la base. El script llama a `/mantenimiento/migrar` con esa clave, y en InfinityFree eso suele fallar porque el hosting frena a los programas que no son un navegador. En ese caso muestra un link `https://sitio/mantenimiento?clave=...`: abrilo y tocá **Aplicar actualizaciones**.
+5. Ahí mismo aparece **Crear el primer administrador**, que reemplaza a `php yii admin/crear` en hostings sin consola. Esa página solo funciona mientras el sitio no tenga ningún usuario.
+
+### Actualizaciones de la base de datos
+
+Las migraciones se aplican desde la web (`components/Migraciones.php`), con la misma tabla que `php yii migrate`. Hay tres formas:
+- Automáticamente, al final de `publicar.php`, si el hosting lo permite.
+- Con el link de mantenimiento que muestra el script.
+- Desde el panel: si hay actualizaciones pendientes, los administradores ven un aviso con el botón **Aplicar ahora**.
+
+Si a un sitio que ya estaba subido a mano le falta la `MANTENIMIENTO_CLAVE`, el script se la agrega a su `.env` la primera vez que publica.
+
 ## Roles
 
 | Rol | Puede |

@@ -16,6 +16,7 @@ use yii\web\UploadedFile;
  * @property string|null $eslogan
  * @property string|null $descripcion
  * @property string|null $banner
+ * @property string|null $banner_movil
  * @property string|null $whatsapp
  * @property string|null $telefono
  * @property string|null $email
@@ -33,6 +34,8 @@ class Emprendimiento extends ActiveRecord
 {
     /** @var UploadedFile|null */
     public $bannerNuevo;
+    /** @var UploadedFile|null versión para pantallas angostas (si no hay, se usa el banner general) */
+    public $bannerMovilNuevo;
 
     private static ?Emprendimiento $_actual = null;
 
@@ -76,7 +79,7 @@ class Emprendimiento extends ActiveRecord
             ['dolar_manual', 'number', 'min' => 0, 'enableClientValidation' => false, 'message' => 'Escribí solo el número, por ejemplo 1565 o 1.565,50.'],
             ['dolar_manual', 'default', 'value' => null],
             [array_diff($textos, ['nombre']), 'default', 'value' => null],
-            ['bannerNuevo', 'image', 'skipOnEmpty' => true, 'extensions' => 'jpg, jpeg, png, webp',
+            [['bannerNuevo', 'bannerMovilNuevo'], 'image', 'skipOnEmpty' => true, 'extensions' => 'jpg, jpeg, png, webp',
                 'checkExtensionByMimeType' => true, 'maxSize' => Yii::$app->params['fotoMaximoMb'] * 1024 * 1024],
         ];
     }
@@ -98,30 +101,39 @@ class Emprendimiento extends ActiveRecord
             'dolar_tipo' => 'Dólar para calcular los precios',
             'dolar_manual' => 'Cotización manual (opcional)',
             'bannerNuevo' => 'Imagen del banner',
+            'bannerMovilNuevo' => 'Banner para celular (opcional)',
         ];
     }
 
-    /** Guarda el banner subido (si hay) reemplazando el anterior. Devuelve el error o null */
-    public function guardarBanner(): ?string
+    /**
+     * Guarda los banners subidos (el general y el de celular) reemplazando los anteriores.
+     * Devuelve los errores (vacío si salió todo bien).
+     */
+    public function guardarBanners(): array
     {
-        if (!$this->bannerNuevo) {
-            return null;
+        $errores = [];
+        foreach (['banner' => $this->bannerNuevo, 'banner_movil' => $this->bannerMovilNuevo] as $campo => $subida) {
+            if (!$subida) {
+                continue;
+            }
+            $r = Fotos::guardar($subida, 'banner', Yii::$app->params['fotoLadoBanner']);
+            if (is_string($r)) {
+                $errores[] = $r;
+                continue;
+            }
+            Fotos::borrar($r[1]);   // el banner no usa miniatura
+            Fotos::borrar($this->$campo);
+            $this->updateAttributes([$campo => $r[0]]);
         }
-        $r = Fotos::guardar($this->bannerNuevo, 'banner', Yii::$app->params['fotoLadoBanner']);
-        if (is_string($r)) {
-            return $r;
-        }
-        Fotos::borrar($r[1]);   // el banner no usa miniatura
-        Fotos::borrar($this->banner);
-        $this->updateAttributes(['banner' => $r[0]]);
 
-        return null;
+        return $errores;
     }
 
-    public function quitarBanner(): void
+    /** @param string $campo banner o banner_movil */
+    public function quitarBanner(string $campo = 'banner'): void
     {
-        Fotos::borrar($this->banner);
-        $this->updateAttributes(['banner' => null]);
+        Fotos::borrar($this->$campo);
+        $this->updateAttributes([$campo => null]);
     }
 
     public function getWhatsappUrl(string $texto = ''): ?string

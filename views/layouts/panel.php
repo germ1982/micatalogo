@@ -40,6 +40,14 @@ $secciones = [
             </nav>
         </aside>
         <div class="col-lg-9">
+            <?php if ($usuario->esAdmin() && ($pendientes = \app\components\Migraciones::pendientes())): ?>
+                <div class="alert alert-warning d-flex flex-wrap align-items-center justify-content-between gap-2">
+                    <span><i class="bi bi-database-exclamation"></i> Hay <?= count($pendientes) ?> actualizaciones de la base de datos pendientes.</span>
+                    <?= Html::beginForm(['/panel/mantenimiento/aplicar'], 'post') ?>
+                    <?= Html::submitButton('Aplicar ahora', ['class' => 'btn btn-sm btn-warning']) ?>
+                    <?= Html::endForm() ?>
+                </div>
+            <?php endif; ?>
             <?= $content ?>
         </div>
     </div>

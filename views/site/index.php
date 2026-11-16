@@ -27,15 +27,25 @@ if ($logueado && !($ver['si'] && $ver['no'])) {
     $sinFiltros += ['estado' => 1, 'ver' => array_keys(array_filter($ver))];
 }
 $urlCatalogo = Url::home(true);
-// El banner toma la proporción de la imagen subida, así en la computadora se ve entera y no se corta
-$proporcion = '';
-if ($sitio->banner && ($medidas = @getimagesize(Yii::getAlias('@webroot/' . $sitio->banner)))) {
-    $proporcion = "aspect-ratio: {$medidas[0]} / {$medidas[1]};";
+// El banner toma la proporción de la imagen subida, así se ve entero y no se corta.
+// Si hay banner para celular, en pantallas chicas se usa ese (con su propia proporción, ver site.css).
+$proporcion = function (?string $archivo): string {
+    $medidas = $archivo ? @getimagesize(Yii::getAlias('@webroot/' . $archivo)) : false;
+
+    return $medidas ? "{$medidas[0]} / {$medidas[1]}" : '';
+};
+$bannerGeneral = $sitio->banner ?: $sitio->banner_movil;
+$estiloBanner = '';
+if ($bannerGeneral) {
+    $estiloBanner = "background-image: url('" . Html::encode(Fotos::url($bannerGeneral)) . "'); aspect-ratio: " . $proporcion($bannerGeneral) . ';';
+    if ($sitio->banner_movil) {
+        $estiloBanner .= " --banner-movil: url('" . Html::encode(Fotos::url($sitio->banner_movil)) . "'); --proporcion-movil: " . $proporcion($sitio->banner_movil) . ';';
+    }
 }
 $this->params['og'] = ['url' => $urlCatalogo];
 ?>
-<section class="banner <?= $sitio->banner ? 'con-imagen' : '' ?>"
-    <?php if ($sitio->banner): ?>style="background-image: url('<?= Html::encode(Fotos::url($sitio->banner)) ?>'); <?= $proporcion ?>"<?php endif; ?>>
+<section class="banner<?= $bannerGeneral ? ' con-imagen' : '' ?><?= $sitio->banner_movil ? ' con-movil' : '' ?>"
+    <?php if ($estiloBanner): ?>style="<?= $estiloBanner ?>"<?php endif; ?>>
     <div class="container banner-texto">
         <h1><?= Html::encode($sitio->nombre) ?></h1>
         <?php if ($sitio->eslogan): ?>

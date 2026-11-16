@@ -7,3 +7,5 @@ Thumbs.db
 .DS_Store
 /web/uploads/*
 !/web/uploads/.htaccess
+/deploy/sitios.ini
+/deploy/estado/

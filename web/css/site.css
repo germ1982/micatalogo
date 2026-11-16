@@ -293,10 +293,9 @@
 [data-tema="germ"] select option:checked { background-color: #00577a; color: #fff; }
 [data-tema="germ"] .form-select { color-scheme: dark; }
 [data-tema="germ"] .banner { border-bottom: 1px solid #00bfff; box-shadow: 0 0 25px rgba(0, 191, 255, .5); }
-/* Texto del banner en celeste neón (no blanco) sobre una franja oscura degradada,
-   para que se lea sin pelearse con el logo de la imagen */
+/* Texto del banner en celeste neón (no blanco) sobre una franja oscura suave abajo */
 [data-tema="germ"] .banner.con-imagen::before {
-    background: linear-gradient(to top, rgba(0, 6, 12, .95) 0%, rgba(0, 6, 12, .88) 30%, rgba(0, 6, 12, .35) 52%, transparent 70%);
+    background: linear-gradient(to top, rgba(0, 6, 12, .85) 0%, rgba(0, 6, 12, .4) 22%, transparent 40%);
 }
 [data-tema="germ"] .banner-texto { padding-bottom: 2.6rem; }
 [data-tema="germ"] .banner-texto h1 {
@@ -474,7 +473,17 @@ a:hover { color: var(--primario-hover); }
    de costado. Tope de alto para pantallas enormes. */
 /* width: 100% evita que min-height estire el ancho a través del aspect-ratio */
 .banner.con-imagen { width: 100%; min-height: 220px; max-height: 80vh; }
-@media (max-width: 575.98px) { .banner.con-imagen { min-height: 260px; } }
+@media (max-width: 575.98px) {
+    .banner.con-imagen { min-height: 260px; }
+    /* Banner propio para celular: se ve entero con su proporción (los !important ganan al estilo en línea) */
+    .banner.con-movil {
+        background-image: var(--banner-movil) !important;
+        aspect-ratio: var(--proporcion-movil) !important;
+        background-position: center !important;
+        min-height: 0;
+    }
+}
+.banner-actual img.movil { height: 90px; aspect-ratio: auto; }
 .banner.con-imagen::before {
     content: "";
     position: absolute;
