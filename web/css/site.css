@@ -559,7 +559,46 @@ a:hover { color: var(--primario-hover); }
 }
 .tarjeta-titulo { font-size: 1rem; font-weight: 600; margin: .15rem 0 .4rem; line-height: 1.3; }
 .tarjeta-titulo a { color: var(--texto); text-decoration: none; }
-.tarjeta-precio { margin-top: auto; font-weight: 700; font-size: 1.1rem; color: var(--primario); }
+.tarjeta-precio { font-weight: 700; font-size: 1.1rem; color: var(--primario); }
+.tarjeta-pie {
+    margin-top: auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .35rem .5rem;
+}
+.tarjeta-acciones {
+    position: relative;
+    z-index: 2;            /* por encima del stretched-link */
+    display: flex;
+    gap: .3rem;
+    margin-left: auto;
+}
+.tarjeta-acciones form { display: contents; }
+.btn-icono {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: 1px solid var(--borde);
+    border-radius: 50%;
+    background: var(--superficie);
+    color: var(--texto);
+    font-size: .95rem;
+    line-height: 1;
+    text-decoration: none;
+    transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+}
+.btn-icono:hover { background: var(--superficie-2); color: var(--texto); }
+.btn-icono.whatsapp { color: #25d366; }
+.btn-icono.whatsapp:hover { background: #25d366; border-color: #25d366; color: #fff; }
+.btn-icono.peligro { color: #dc3545; }
+.btn-icono.peligro:hover { background: #dc3545; border-color: #dc3545; color: #fff; }
+.btn-icono.exito { color: #198754; }
+.btn-icono.exito:hover { background: #198754; border-color: #198754; color: #fff; }
 
 .tarjeta .estado {
     position: absolute;
@@ -576,20 +615,9 @@ a:hover { color: var(--primario-hover); }
 .tarjeta.no-disponible { border-style: dashed; border-color: #dc3545; }
 .tarjeta.no-disponible .tarjeta-foto img { filter: grayscale(1); opacity: .55; }
 
-.tarjeta-admin {
-    position: relative;
-    z-index: 2;            /* por encima del stretched-link */
-    display: flex;
-    gap: .35rem;
-    padding: .55rem .85rem;
-    border-top: 1px solid var(--borde);
-    background: var(--superficie-2);
-}
-.tarjeta-admin > *, .tarjeta-admin form { flex: 1; }
-.tarjeta-admin .btn { width: 100%; white-space: nowrap; font-size: .78rem; }
 @media (max-width: 575.98px) {
-    .tarjeta-admin { flex-direction: column; padding: .5rem; }
     .tarjeta-cuerpo { padding: .6rem; }
+    .btn-icono { width: 1.85rem; height: 1.85rem; font-size: .88rem; }
     .tarjeta-titulo { font-size: .92rem; }
 }
 
